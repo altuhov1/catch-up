@@ -69,7 +69,11 @@ func (a *App) setupRoutes(handler *handlers.Handler) http.Handler {
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
 
 	// API routes
-	apiRoutes := map[string]http.HandlerFunc{}
+	apiRoutes := map[string]http.HandlerFunc{
+		"/api/loadUnfinishedWork": handler.LoadUnfinishedWork,
+		"/api/saveNewUrls":        handler.SaveNewUrls,
+		"/api/loadUrls":           handler.LoadUrls,
+	}
 
 	for path, handlerFunc := range apiRoutes {
 		mux.HandleFunc(path, handlerFunc)
@@ -108,5 +112,6 @@ func (a *App) shutdown() {
 		slog.Error("Server forced to shutdown", "error", err)
 		os.Exit(1)
 	}
+	a.services.LinksService.WaitForCompletion()
 	slog.Info("Server stopped")
 }
